@@ -1,11 +1,11 @@
 package ro.itschool.CarDealership.entity;
 
 import jakarta.persistence.*;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import ro.itschool.CarDealership.util.Constants;
 
 import java.io.Serial;
 import java.util.*;
@@ -13,7 +13,6 @@ import java.util.*;
 @Getter
 @Setter
 @Entity
-
 public class MyUser implements UserDetails {
 
     @Serial
@@ -76,7 +75,10 @@ public class MyUser implements UserDetails {
         this.shoppingCart = new ShoppingCart();
         this.orders = new ArrayList<>();
         this.roles = new HashSet<>();
+        this.wishList = new WishList();
     }
+
+
 
     public void addOrderToUser(Order order) {
         this.orders.add(order);
@@ -94,6 +96,7 @@ public class MyUser implements UserDetails {
         this.credentialsNonExpired = myUser.isCredentialsNonExpired();
         this.email = myUser.getEmail();
         this.shoppingCart = myUser.getShoppingCart();
+        this.wishList = myUser.getWishList();
         this.orders = myUser.getOrders();
     }
 
