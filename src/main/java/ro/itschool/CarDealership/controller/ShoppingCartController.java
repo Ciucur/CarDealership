@@ -5,14 +5,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import ro.itschool.CarDealership.entity.MyUser;
 import ro.itschool.CarDealership.entity.Product;
-import ro.itschool.CarDealership.entity.ShoppingCart;
 import ro.itschool.CarDealership.repository.OrderRepository;
 import ro.itschool.CarDealership.repository.ProductRepository;
+import ro.itschool.CarDealership.repository.ShoppingCartRepository;
 import ro.itschool.CarDealership.service.ShoppingCartService;
 import ro.itschool.CarDealership.service.UserService;
+import ro.itschool.CarDealership.service.WishListService;
 
 import java.util.Optional;
 
@@ -24,7 +26,12 @@ public class ShoppingCartController {
     private ShoppingCartService shoppingCartService;
 
     @Autowired
+    private ShoppingCartRepository shoppingCartRepository;
+    @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    private WishListService wishListService;
 
     @Autowired
     private ProductRepository productRepository;

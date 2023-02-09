@@ -31,6 +31,7 @@
                 <th> Price</th>
                 <th sec:authorize="hasRole('ROLE_ADMIN')"> Delete product</th>
                 <th> Add to cart</th>
+                <th> Add to wishlist</th>
 
             </tr>
             </thead>
@@ -46,6 +47,7 @@
                                                              class="fa-solid fa-trash"></a>
                 </td>
                 <td><a th:href="@{'/product/add/' + ${product.id}}" class="fa-solid fa-plus"></a>
+                <td><a th:href="@{'/product/addToWishList/' + ${product.id}}" class="fa-regular fa-heart"></a>
                 </td>
             </tr>
             </tbody>
