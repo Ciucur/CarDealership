@@ -34,9 +34,9 @@ public class WishListController {
     @Autowired
     private ShoppingCartRepository shoppingCartRepository;
 
-    @RequestMapping(value = "/to-shopping-cart")
-    public String convertToShoppingCart() {
-
+    @RequestMapping(value = "/to-shopping-cart/{productId}")
+    public String convertToShoppingCart(@PathVariable Integer productId) {
+        Optional<Product> optionalProduct = productRepository.findById(productId);
         //stabilim care e username-ul user-ului autentificat
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String currentPrincipalName = auth.getName();
@@ -44,11 +44,12 @@ public class WishListController {
         //aducem userul din db pe baza username-ului
         MyUser user = userService.findUserByUserName(currentPrincipalName);
         //transferam produsele din wishlist in shoppingCart
-        shoppingCartRepository.save(wishListService.convertWishListToShoppingCart(user.getWishList()));
-        user.getWishList().getProducts().clear();
+        optionalProduct.ifPresent(product -> {
+            user.getShoppingCart().addProductToShoppingCart(product);
+        });
         userService.updateUser(user);
 
-        return "order-successful";
+        return "redirect:/wish-list";
     }
 
 

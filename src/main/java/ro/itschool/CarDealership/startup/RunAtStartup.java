@@ -54,7 +54,7 @@ public class RunAtStartup {
         myUser.setPassword("admin");
         myUser.setRandomToken("randomToken");
         final Set<Role> roles = new HashSet<>();
-        roles.add(roleRepository.findByName(Constants.ROLE_USER));
+        //roles.add(roleRepository.findByName(Constants.ROLE_USER));
         roles.add(roleRepository.findByName(Constants.ROLE_ADMIN));
         myUser.setRoles(roles);
         myUser.setEnabled(true);
