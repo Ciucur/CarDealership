@@ -8,7 +8,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ro.itschool.CarDealership.entity.MyUser;
 import ro.itschool.CarDealership.entity.Product;
+import ro.itschool.CarDealership.entity.ShoppingCartProductQuantity;
 import ro.itschool.CarDealership.repository.ProductRepository;
+import ro.itschool.CarDealership.repository.ShoppingCartProductQuantityRepository;
 import ro.itschool.CarDealership.repository.WishListRepository;
 import ro.itschool.CarDealership.service.ShoppingCartService;
 import ro.itschool.CarDealership.service.UserService;
@@ -34,6 +36,9 @@ public class ProductController {
     @Autowired
     private WishListService wishListService;
 
+    @Autowired
+    private ShoppingCartProductQuantityRepository quantityRepository;
+
 
 //    @GetMapping(value = "/all")
 //    public List<Car> getAllCars(){return carRepository.findAll();}
@@ -41,7 +46,7 @@ public class ProductController {
     @RequestMapping(value = {"/all"})
     public String index(Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        model.addAttribute("products", productRepository.findByDeletedIsFalse());
+        model.addAttribute("products", productRepository.findByQuantityGreaterThan(0L));
         return "products";
     }
 
@@ -53,7 +58,7 @@ public class ProductController {
     }
 
     @RequestMapping(value = "/add/{id}")
-    public String addProductToShoppingCart(@PathVariable Integer id) {
+    public String addProductToShoppingCart(@PathVariable Integer id, @ModelAttribute("product") @RequestBody Product frontendProduct) {
         //cautam produsul dupa id
         Optional<Product> optionalProduct = productRepository.findById(id);
 
@@ -64,9 +69,22 @@ public class ProductController {
         //aducem userul din db pe baza username-ului
         MyUser userByUserName = userService.findUserByUserName(currentPrincipalName);
 
+        Integer quantityToBeOrdered = frontendProduct.getQuantity();
+
         //in shopping cart-ul userului adus adaugam produsul trimis din frontend
         optionalProduct.ifPresent(product -> {
-            userByUserName.getShoppingCart().addProductToShoppingCart(product);
+            //setez pe produs quantity-ul si il adaug in shopping cart
+            Product productToBeAddedToShoppingCart = new Product();
+            productToBeAddedToShoppingCart.setId(product.getId());
+            productToBeAddedToShoppingCart.setPrice(product.getPrice());
+            productToBeAddedToShoppingCart.setName(product.getName());
+            productToBeAddedToShoppingCart.setQuantity(quantityToBeOrdered);
+            userByUserName.getShoppingCart().addProductToShoppingCart(productToBeAddedToShoppingCart);
+
+
+            product.setQuantity(product.getQuantity() - quantityToBeOrdered);
+            quantityRepository.save(new ShoppingCartProductQuantity(userByUserName.getId().intValue(), product.getId(), quantityToBeOrdered));
+            productRepository.save(product);
             userService.updateUser(userByUserName);
         });
 
@@ -81,7 +99,6 @@ public class ProductController {
 
     @PostMapping(value = "/add-new")
     public String addProduct(@ModelAttribute("product") @RequestBody Product product) {
-        product.setDeleted(false);
         productRepository.save(product);
         return Constants.REDIRECT_TO_PRODUCTS;
     }
