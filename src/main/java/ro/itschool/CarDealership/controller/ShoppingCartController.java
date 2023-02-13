@@ -11,11 +11,13 @@ import ro.itschool.CarDealership.entity.MyUser;
 import ro.itschool.CarDealership.entity.Product;
 import ro.itschool.CarDealership.repository.OrderRepository;
 import ro.itschool.CarDealership.repository.ProductRepository;
+import ro.itschool.CarDealership.repository.ShoppingCartProductQuantityRepository;
 import ro.itschool.CarDealership.repository.ShoppingCartRepository;
 import ro.itschool.CarDealership.service.ShoppingCartService;
 import ro.itschool.CarDealership.service.UserService;
 import ro.itschool.CarDealership.service.WishListService;
 
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -25,8 +27,6 @@ public class ShoppingCartController {
     @Autowired
     private ShoppingCartService shoppingCartService;
 
-    @Autowired
-    private ShoppingCartRepository shoppingCartRepository;
     @Autowired
     private OrderRepository orderRepository;
 
@@ -38,6 +38,9 @@ public class ShoppingCartController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private ShoppingCartProductQuantityRepository quantityRepository;
 
 //    @PutMapping(value = "/add/{cartId}")
 //    public ResponseEntity addProductToShoppingCart(@PathVariable Integer cartId, @RequestParam Integer productId) {
@@ -73,6 +76,12 @@ public class ShoppingCartController {
         //aducem userul din db pe baza username-ului
         MyUser user = userService.findUserByUserName(currentPrincipalName);
 
+        List<Product> productsByShoppingCartId = quantityRepository.getProductsByShoppingCartId(user.getId());
+        shoppingCartService.findById(user.getId().intValue()).ifPresent(cart -> {
+            cart.setProducts(productsByShoppingCartId);
+            user.setShoppingCart(cart);
+        });
+
         orderRepository.save(shoppingCartService.convertShoppingCartToOrder(user.getShoppingCart()));
         user.getShoppingCart().getProducts().clear();
         userService.updateUser(user);
@@ -89,7 +98,10 @@ public class ShoppingCartController {
         //aducem userul din db pe baza username-ului
         MyUser userByUserName = userService.findUserByUserName(currentPrincipalName);
 
-        model.addAttribute("products", userByUserName.getShoppingCart().getProducts());
+        List<Product> productsByShoppingCartId = quantityRepository.getProductsByShoppingCartId(userByUserName.getId());
+
+
+        model.addAttribute("products", productsByShoppingCartId);
 
         return "shopping-cart";
     }
@@ -103,10 +115,20 @@ public class ShoppingCartController {
         //aducem userul din db pe baza username-ului
         MyUser userByUserName = userService.findUserByUserName(currentPrincipalName);
 
-        Optional<Product> optionalProduct = productRepository.findById(productId);
 
-        userByUserName.getShoppingCart().getProducts().removeIf(product -> product.getId().equals(productId));
-        userService.updateUser(userByUserName);
+        quantityRepository.getProductsByShoppingCartId(userByUserName.getId()).stream()
+                .filter(p -> p.getId().equals(productId))
+                .peek(p -> {
+                    Optional<Product> byId = productRepository.findById(p.getId());
+                    byId.ifPresent(pr -> {
+                        pr.setQuantity(pr.getQuantity() + p.getQuantity());
+                        productRepository.save(byId.get());
+                    });
+                })
+                .findFirst();
+        quantityRepository.deleteByShoppingCartIdAndProductId(userByUserName.getId().intValue(), productId);
+
+//        userService.updateUser(userByUserName);
 
         return "redirect:/shopping-cart";
     }
