@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.Persistent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +23,8 @@ public class ShoppingCart {
 
     //un cart poate avea mai multe produse
     //un produs poate fi in mai multe carturi
-    @ManyToMany(fetch = FetchType.EAGER)
+    //@ManyToMany(fetch = FetchType.EAGER)
+    @Transient
     private List<Product> products = new ArrayList<>();
 
     @OneToOne(mappedBy = "shoppingCart")

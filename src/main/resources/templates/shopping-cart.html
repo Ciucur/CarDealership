@@ -28,14 +28,14 @@
         <tr>
           <th> Name</th>
           <th> Price</th>
-          <th> Not available </th>
-          <th></th>
+          <th> Quantity to be ordered </th>
+          <th> Delete product </th>
 
         </tr>
         </thead>
         <tbody>
         <tr th:if="${products.empty}">
-          <td colspan="3"> Shopping Cart empty</td>
+          <td colspan="6"> Shopping Cart empty</td>
         </tr>
         <tr th:each="product : ${products}">
           <td><span th:text="${product.name}">  </span></td>

@@ -6,10 +6,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import ro.itschool.CarDealership.entity.*;
-import ro.itschool.CarDealership.repository.ProductRepository;
-import ro.itschool.CarDealership.repository.RoleRepository;
-import ro.itschool.CarDealership.repository.ShoppingCartProductQuantityRepository;
-import ro.itschool.CarDealership.repository.UserRepository;
+import ro.itschool.CarDealership.repository.*;
 import ro.itschool.CarDealership.service.ShoppingCartService;
 import ro.itschool.CarDealership.service.UserService;
 import ro.itschool.CarDealership.util.Constants;
@@ -35,6 +32,8 @@ public class RunAtStartup {
     private final UserRepository userRepository;
 
     private final ShoppingCartProductQuantityRepository quantityRepository;
+
+
 
 
     @EventListener(ContextRefreshedEvent.class)

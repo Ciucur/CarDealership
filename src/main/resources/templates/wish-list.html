@@ -28,7 +28,7 @@
         <tr>
           <th> Name</th>
           <th> Price</th>
-          <th> Not available </th>
+          <th> Quantity </th>
           <th> Delete product</th>
           <th> Add product to shopping cart</th>
           </th>
@@ -37,12 +37,12 @@
         </thead>
         <tbody>
         <tr th:if="${products.empty}">
-          <td colspan="3"> Wishlist empty</td>
+          <td colspan="9"> Wishlist empty</td>
         </tr>
         <tr th:each="product : ${products}">
           <td><span th:text="${product.name}">  </span></td>
           <td><span th:text="${product.price}"> </span></td>
-          <td><span th:text="${product.deleted}"> </span></td>
+          <td><span th:text="${product.quantity}"> </span></td>
           <td ><a th:href="@{'/wish-list/product/remove/' + ${product.id}}"
                   class="fa-solid fa-trash"></a>
           <td ><a th:href="@{'/wish-list/to-shopping-cart/' + ${product.id}}"
@@ -50,6 +50,13 @@
         </tr>
         </tbody>
       </table>
+      <div class="card-body">
+        <form th:action="@{'/wish-list/to-shopping-cart/{productId}'}" method="POST">
+          <div class="box-footer text-center">
+            <button type="submit" class="btn btn-dark">Buy</button>
+          </div>
+        </form>
+      </div>
 
 
 

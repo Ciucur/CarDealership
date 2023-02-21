@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
     <title>Security</title>
     <meta charset="utf-8">
@@ -37,7 +37,7 @@
             </thead>
             <tbody>
             <tr th:if="${products.empty}">
-                <td colspan="3"> No Products Available</td>
+                <td colspan="9"> No Products Available</td>
             </tr>
             <tr th:each="product : ${products}">
                 <td><span th:text="${product.id}">  </span></td>
@@ -46,7 +46,25 @@
                 <td sec:authorize="hasRole('ROLE_ADMIN')"><a th:href="@{'/product/delete/' + ${product.id}}"
                                                              class="fa-solid fa-trash"></a>
                 </td>
-                <td><a th:href="@{'/product/addToWishList/' + ${product.id}}" class="fa-regular fa-heart"></a>
+<!--                <td><a th:href="@{'/product/addToWishList/' + ${product.id}}" class="fa-regular fa-heart"></a>-->
+<!--                </td>-->
+                <td>
+                    <form th:action="@{/product/addToWishList/{productId}(productId = ${product.id})}" method="post"
+                          th:object="${product2}">
+                        <div class="input-group w-auto justify-content-end align-items-center">
+                            <input type="button" value="-"
+                                   class="button-minus border rounded-circle  icon-shape icon-sm mx-1 "
+                                   data-field="quantity">
+                            <input type="number" th:value="${quantity}" step="1" max="10" value="1"
+                                   name="quantity"
+                                   class="quantity-field border-0 text-center w-25">
+                            <input class="button-plus border rounded-circle icon-shape icon-sm " data-field="quantity"
+                                   type="button"
+                                   value="+">
+                            <input type="hidden" th:value="${id}"/>
+                            <button type="submit">+</button>
+                        </div>
+                    </form>
                 </td>
                 <td>
                     <form th:action="@{/product/add/{productId}(productId = ${product.id})}" method="post"
@@ -58,11 +76,11 @@
                             <input type="number" th:value="${quantity}" step="1" max="10" value="1"
                                    name="quantity"
                                    class="quantity-field border-0 text-center w-25">
-                            <input type="button" value="+"
-                                   class="button-plus border rounded-circle icon-shape icon-sm "
-                                   data-field="quantity">
+                            <input class="button-plus border rounded-circle icon-shape icon-sm " data-field="quantity"
+                                   type="button"
+                                   value="+">
                             <input type="hidden" th:value="${id}"/>
-                            <button type="submit">+</button>
+                            <button type="submit"><a>+</a></button>
                         </div>
                     </form>
                 </td>

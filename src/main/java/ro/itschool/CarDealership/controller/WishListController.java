@@ -8,13 +8,14 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ro.itschool.CarDealership.entity.MyUser;
+import ro.itschool.CarDealership.entity.Order;
 import ro.itschool.CarDealership.entity.Product;
-import ro.itschool.CarDealership.repository.OrderRepository;
-import ro.itschool.CarDealership.repository.ProductRepository;
-import ro.itschool.CarDealership.repository.ShoppingCartRepository;
+import ro.itschool.CarDealership.entity.ShoppingCart;
+import ro.itschool.CarDealership.repository.*;
 import ro.itschool.CarDealership.service.UserService;
 import ro.itschool.CarDealership.service.WishListService;
 
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -34,22 +35,52 @@ public class WishListController {
     @Autowired
     private ShoppingCartRepository shoppingCartRepository;
 
+    @Autowired
+    private ShoppingCartProductQuantityRepository quantityRepository;
+
+    @Autowired
+    private WishListProductQuantityRepository wishListProductQuantityRepository;
+
+
+//    @RequestMapping(value = "/to-shopping-cart/{productId}")
+//    public String convertToShoppingCart(@PathVariable Integer productId) {
+//        Optional<Product> optionalProduct = productRepository.findById(productId);
+//        //stabilim care e username-ul user-ului autentificat
+//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+//        String currentPrincipalName = auth.getName();
+//
+//        //aducem userul din db pe baza username-ului
+//        MyUser user = userService.findUserByUserName(currentPrincipalName);
+//        //transferam produsele din wishlist in shoppingCart
+//        optionalProduct.ifPresent(product -> {
+//            user.getShoppingCart().addProductToShoppingCart(product);
+//        });
+//        userService.updateUser(user);
+//
+//        return "redirect:/wish-list";
+//    }
+
     @RequestMapping(value = "/to-shopping-cart/{productId}")
-    public String convertToShoppingCart(@PathVariable Integer productId) {
-        Optional<Product> optionalProduct = productRepository.findById(productId);
+    public String convertWishListToShoppingCart(Model model) {
+
         //stabilim care e username-ul user-ului autentificat
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String currentPrincipalName = auth.getName();
 
         //aducem userul din db pe baza username-ului
         MyUser user = userService.findUserByUserName(currentPrincipalName);
-        //transferam produsele din wishlist in shoppingCart
-        optionalProduct.ifPresent(product -> {
-            user.getShoppingCart().addProductToShoppingCart(product);
-        });
-        userService.updateUser(user);
 
-        return "redirect:/wish-list";
+        List<Product> productsByWishListId = wishListProductQuantityRepository.getProductsByWishListId(user.getId());
+        wishListService.findById(user.getId().intValue()).ifPresent(wl -> {
+            wl.setProducts(productsByWishListId);
+            user.setShoppingCart(wl);
+        });
+
+        ShoppingCart shoppingCart = shoppingCartRepository.save(wishListService.convertWishListToShoppingCart(user.getWishList()));
+        user.getWishList().getProducts().clear();
+        wishListProductQuantityRepository.deleteByWishListId(user.getId().intValue());
+        model.addAttribute("shoppingCart", shoppingCart);
+        return "order-successful";
     }
 
 
@@ -76,12 +107,22 @@ public class WishListController {
         //aducem userul din db pe baza username-ului
         MyUser userByUserName = userService.findUserByUserName(currentPrincipalName);
 
-        Optional<Product> optionalProduct = productRepository.findById(productId);
 
-        userByUserName.getWishList().getProducts().removeIf(product -> product.getId().equals(productId));
-        userService.updateUser(userByUserName);
+        wishListProductQuantityRepository.getProductsByWishListId(userByUserName.getId()).stream()
+                .filter(p -> p.getId().equals(productId))
+                .peek(p -> {
+                    Optional<Product> byId = productRepository.findById(p.getId());
+                    byId.ifPresent(pr -> {
+                        pr.setQuantity(pr.getQuantity() + p.getQuantity());
+                        productRepository.save(byId.get());
+                    });
+                })
+                .findFirst();
+       wishListProductQuantityRepository.deleteByWishListIdAndProductId(userByUserName.getId().intValue(), productId);
 
-        return "redirect:/wish-list";
+//        userService.updateUser(userByUserName);
+
+        return "redirect:/shopping-cart";
     }
 
 }
