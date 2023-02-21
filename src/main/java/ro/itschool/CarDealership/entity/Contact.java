@@ -9,29 +9,25 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
 @Getter
 @Setter
-@Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class Product {
+@Entity
+public class Contact {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private String name;
+    private String username;
 
-    private float price;
+    private String email;
 
-    private Integer quantity;
+    private String subject;
 
-    public Product(String name, float price, Integer quantity) {
-        this.name = name;
-        this.price = price;
-        this.quantity = quantity;
-    }
-
+    private String message;
 
 }
+
+

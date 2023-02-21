@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ro.itschool.CarDealership.entity.MyUser;
+import ro.itschool.CarDealership.entity.Order;
 import ro.itschool.CarDealership.entity.Product;
 import ro.itschool.CarDealership.repository.OrderRepository;
 import ro.itschool.CarDealership.repository.ProductRepository;
@@ -66,8 +67,9 @@ public class ShoppingCartController {
 //        return ResponseEntity.ok().build();
 //    }
 
+
     @RequestMapping(value = "/to-order")
-    public String convertToOrder() {
+    public String convertToOrder(Model model) {
 
         //stabilim care e username-ul user-ului autentificat
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -82,10 +84,10 @@ public class ShoppingCartController {
             user.setShoppingCart(cart);
         });
 
-        orderRepository.save(shoppingCartService.convertShoppingCartToOrder(user.getShoppingCart()));
+        Order order = orderRepository.save(shoppingCartService.convertShoppingCartToOrder(user.getShoppingCart()));
         user.getShoppingCart().getProducts().clear();
-        userService.updateUser(user);
-
+        quantityRepository.deleteByShoppingCartId(user.getId().intValue());
+        model.addAttribute("order", order);
         return "order-successful";
     }
 

@@ -9,27 +9,24 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
+@Entity
 @Getter
 @Setter
-@Entity
-@NoArgsConstructor
 @AllArgsConstructor
-public class Product {
+@NoArgsConstructor
+public class WishListProductQuantity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    private String name;
-
-    private float price;
-
+    private Integer wishListId;
+    private Integer productId;
     private Integer quantity;
 
-    public Product(String name, float price, Integer quantity) {
-        this.name = name;
-        this.price = price;
+    public WishListProductQuantity(Integer wishListId, Integer productId, Integer quantity) {
+        this.wishListId = wishListId;
+        this.productId = productId;
         this.quantity = quantity;
     }
 
