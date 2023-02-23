@@ -28,7 +28,6 @@ public class OrderController {
         if(optionatUser.isPresent())
             return optionatUser.get().getOrders();
         else
-            //TODO custom exception
             throw new UserPrincipalNotFoundException("User not found");
     }
 }

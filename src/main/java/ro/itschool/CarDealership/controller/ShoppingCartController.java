@@ -17,6 +17,7 @@ import ro.itschool.CarDealership.repository.ShoppingCartRepository;
 import ro.itschool.CarDealership.service.ShoppingCartService;
 import ro.itschool.CarDealership.service.UserService;
 import ro.itschool.CarDealership.service.WishListService;
+import ro.itschool.CarDealership.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
@@ -88,7 +89,7 @@ public class ShoppingCartController {
         user.getShoppingCart().getProducts().clear();
         quantityRepository.deleteByShoppingCartId(user.getId().intValue());
         model.addAttribute("order", order);
-        return "order-successful";
+        return Constants.ORDER_SUCCESSFUL;
     }
 
     @RequestMapping
@@ -105,7 +106,7 @@ public class ShoppingCartController {
 
         model.addAttribute("products", productsByShoppingCartId);
 
-        return "shopping-cart";
+        return Constants.SHOPPING_CART;
     }
 
     @RequestMapping(value = "/product/remove/{productId}")
@@ -117,22 +118,18 @@ public class ShoppingCartController {
         //aducem userul din db pe baza username-ului
         MyUser userByUserName = userService.findUserByUserName(currentPrincipalName);
 
-
         quantityRepository.getProductsByShoppingCartId(userByUserName.getId()).stream()
-                .filter(p -> p.getId().equals(productId))
-                .peek(p -> {
-                    Optional<Product> byId = productRepository.findById(p.getId());
-                    byId.ifPresent(pr -> {
+                .filter(product -> product.getId().equals(productId))
+                .forEach(p -> {
+                    Optional<Product> productOptional = productRepository.findById(p.getId());
+                    productOptional.ifPresent(pr -> {
                         pr.setQuantity(pr.getQuantity() + p.getQuantity());
-                        productRepository.save(byId.get());
+                        productRepository.save(productOptional.get());
                     });
-                })
-                .findFirst();
+                });
         quantityRepository.deleteByShoppingCartIdAndProductId(userByUserName.getId().intValue(), productId);
 
-//        userService.updateUser(userByUserName);
-
-        return "redirect:/shopping-cart";
+        return Constants.REDIRECT_TO_SHOPPING_CART;
     }
 
 }

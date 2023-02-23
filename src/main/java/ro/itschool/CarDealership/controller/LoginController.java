@@ -16,7 +16,7 @@ public class LoginController {
     public String login() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
-            return "login";
+            return Constants.LOGIN;
         }
         return Constants.REDIRECT_TO_PRODUCTS;
     }

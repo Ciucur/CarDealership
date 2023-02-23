@@ -119,4 +119,7 @@ public class MyUser implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.authorities;
     }
+
+    public void setWishList(ShoppingCart wishlist) {
+    }
 }

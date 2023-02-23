@@ -31,7 +31,7 @@ public class RegisterController {
         user.setCredentialsNonExpired(true);
         user.setEnabled(false);
         model.addAttribute("user", user);
-        return "register";
+        return Constants.REGISTER;
     }
 
     @PostMapping(value = "/register")
@@ -41,7 +41,7 @@ public class RegisterController {
             userService.saveUser(user);
             return "register-success";
         } else {
-            return "register";
+            return Constants.REGISTER;
         }
     }
 
