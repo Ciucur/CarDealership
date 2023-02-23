@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 import ro.itschool.CarDealership.entity.Product;
-import ro.itschool.CarDealership.entity.ShoppingCartProductQuantity;
 import ro.itschool.CarDealership.entity.WishListProductQuantity;
 
 import java.util.List;

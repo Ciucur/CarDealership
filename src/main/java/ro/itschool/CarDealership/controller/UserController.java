@@ -35,16 +35,13 @@ public class UserController {
                 .findAny()
                 .orElseThrow(() -> new Exception("User with admin roles not found")));
 
-        return "all-users";
+        return Constants.ALL_USERS;
     }
 
     //---------DELETE a user by id for ADMINs only ------------------------------
     @RequestMapping(path = "/delete/{id}")
     public String deleteUserById(Model model, @PathVariable("id") Long id) {
         userService.deleteById(id);
-        return "redirect:/users";
+        return Constants.REDIRECT_TO_USERS;
     }
-
-
-
 }

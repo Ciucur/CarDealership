@@ -1,6 +1,6 @@
 package ro.itschool.CarDealership.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -15,33 +15,21 @@ import ro.itschool.CarDealership.repository.ShoppingCartProductQuantityRepositor
 import ro.itschool.CarDealership.repository.WishListProductQuantityRepository;
 import ro.itschool.CarDealership.service.ShoppingCartService;
 import ro.itschool.CarDealership.service.UserService;
-import ro.itschool.CarDealership.service.WishListService;
 import ro.itschool.CarDealership.util.Constants;
 
 import java.util.Optional;
 
 
 @Controller
+@RequiredArgsConstructor
 @RequestMapping(value = "/product")
 public class ProductController {
 
-    @Autowired
-    private ProductRepository productRepository;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private ShoppingCartService shoppingCartService;
-
-    @Autowired
-    private WishListService wishListService;
-
-    @Autowired
-    private ShoppingCartProductQuantityRepository quantityRepository;
-
-    @Autowired
-    private WishListProductQuantityRepository wishListProductQuantityRepository;
+    private final ProductRepository productRepository;
+    private final UserService userService;
+    private final ShoppingCartService shoppingCartService;
+    private final ShoppingCartProductQuantityRepository quantityRepository;
+    private final WishListProductQuantityRepository wishListProductQuantityRepository;
 
 
 //    @GetMapping(value = "/all")
@@ -51,7 +39,7 @@ public class ProductController {
     public String index(Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         model.addAttribute("products", productRepository.findByQuantityGreaterThan(0L));
-        return "products";
+        return Constants.PRODUCTS;
     }
 
     @RequestMapping(value = "/delete/{id}")
@@ -65,6 +53,9 @@ public class ProductController {
     public String addProductToShoppingCart(@PathVariable Integer id, @ModelAttribute("product") @RequestBody Product frontendProduct) {
         //cautam produsul dupa id
         Optional<Product> desiredProductOptional = productRepository.findById(id);
+        if (frontendProduct == null)  {
+            throw new RuntimeException("Quantity can't be null");
+        }
         Integer quantityToBeOrdered = frontendProduct.getQuantity();
 
         //stabilim care e username-ul user-ului autentificat
@@ -101,8 +92,6 @@ public class ProductController {
 
         return Constants.REDIRECT_TO_PRODUCTS;
     }
-
-
 
 
     @RequestMapping(value = "/addToWishList/{id}")
@@ -147,11 +136,10 @@ public class ProductController {
     }
 
 
-
     @GetMapping(value = "/add-new")
     public String addProduct(Model model) {
         model.addAttribute("product", new Product());
-        return "add-product";
+        return Constants.ADD_PRODUCT;
     }
 
     @PostMapping(value = "/add-new")
