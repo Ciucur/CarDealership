@@ -31,10 +31,6 @@ public class ProductController {
     private final ShoppingCartProductQuantityRepository quantityRepository;
     private final WishListProductQuantityRepository wishListProductQuantityRepository;
 
-
-//    @GetMapping(value = "/all")
-//    public List<Car> getAllCars(){return carRepository.findAll();}
-
     @RequestMapping(value = {"/all"})
     public String index(Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -99,14 +95,9 @@ public class ProductController {
         //cautam produsul dupa ID
         Optional<Product> optionalProduct = productRepository.findById(id);
 
-        //stabilim care e username-ul user-ului autentificat
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String currentPrincipalName = auth.getName();
-
-        //aducem userul din db pe baza username-ului
-        MyUser userByUserName = userService.findUserByUserName(currentPrincipalName);
-
         Integer quantityToBeOrdered = frontendProduct.getQuantity();
+
+        MyUser loggedUser = getLoggedUser();
 
 
         optionalProduct.ifPresent((product -> {
@@ -115,13 +106,13 @@ public class ProductController {
             productToBeAddedToWishList.setPrice(product.getPrice());
             productToBeAddedToWishList.setName(product.getName());
             productToBeAddedToWishList.setQuantity(quantityToBeOrdered);
-            userByUserName.getWishList().addProductToWishList(productToBeAddedToWishList);
+            loggedUser.getWishList().addProductToWishList(productToBeAddedToWishList);
 
             product.setQuantity(product.getQuantity() - quantityToBeOrdered);
 
-            Optional<WishListProductQuantity> optionalEntity = wishListProductQuantityRepository.findByWishListIdAndProductId(userByUserName.getId().intValue(), product.getId());
+            Optional<WishListProductQuantity> optionalEntity = wishListProductQuantityRepository.findByWishListIdAndProductId(loggedUser.getId().intValue(), product.getId());
             if (optionalEntity.isEmpty()) {
-                wishListProductQuantityRepository.save(new WishListProductQuantity(userByUserName.getId().intValue(), product.getId(), quantityToBeOrdered));
+                wishListProductQuantityRepository.save(new WishListProductQuantity(loggedUser.getId().intValue(), product.getId(), quantityToBeOrdered));
             } else {
                 optionalEntity.ifPresent(opt -> {
                     opt.setQuantity(opt.getQuantity() + quantityToBeOrdered);
@@ -129,7 +120,7 @@ public class ProductController {
                 });
             }
             productRepository.save(product);
-            userService.updateUser(userByUserName);
+            userService.updateUser(loggedUser);
         }));
 
         return Constants.REDIRECT_TO_PRODUCTS;
