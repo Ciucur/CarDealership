@@ -94,8 +94,8 @@ public class RunAtStartup {
                             Product product = productRepository.save(
                                     new Product(
                                             faker.pokemon().name(),
-                                            faker.number().numberBetween(100, 10000),
-                                            faker.number().numberBetween(0, 199)));
+                                            faker.number().numberBetween(1, 200),
+                                            faker.number().numberBetween(0, 50)));
                             quantityRepository.save(new ShoppingCartProductQuantity(myUser.getShoppingCart().getId(), product.getId(), 5));
                             return product;
                         }
@@ -120,8 +120,8 @@ public class RunAtStartup {
                 .generate(() -> productRepository.save(
                         new Product(
                                 faker.pokemon().name(),
-                                faker.number().numberBetween(100, 10000),
-                                faker.number().numberBetween(0, 199)))
+                                faker.number().numberBetween(1, 200),
+                                faker.number().numberBetween(0, 50)))
                 )
                 .limit(5)
                 .toList();
